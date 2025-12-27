@@ -1,0 +1,42 @@
+---
+- name: Automação On-Premise - Patch de Segurança VMware
+  hosts: all
+  become: true
+  gather_facts: yes
+
+  tasks:
+    - name: Criar diretório de configuração para o time de segurança
+      file:
+        path: /etc/cloud-autoupdate
+        state: directory
+        mode: '0755'
+
+    - name: Garantir arquivo de configuração padrão
+      copy:
+        dest: /etc/cloud-autoupdate/cloud-autoupdate.conf
+        content: |
+          [blacklist]
+          blacklist = ""
+        force: no
+
+    - name: Rodar Script de Coleta (Get Packages)
+      script: scripts/get_packages.py
+      register: check_info
+
+    - name: Mostrar pacotes vulneráveis no console do AWX
+      debug:
+        var: check_info.stdout_lines
+
+    - name: Rodar Script de Atualização (Kernel e Seguranca)
+      script: scripts/cloud_autoupdate.py
+      register: update_result
+
+    - name: Identificar se o Kernel foi atualizado
+      set_fact:
+        needs_reboot: "{{ 'linux-image' in update_result.stdout or 'kernel' in update_result.stdout }}"
+
+    - name: Reiniciar Servidor VMware (Somente se necessário)
+      reboot:
+        reboot_timeout: 600
+        msg: "Reiniciando para aplicar novo Kernel via AWX"
+      when: needs_reboot
