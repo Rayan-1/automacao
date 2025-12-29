@@ -14,9 +14,11 @@ def validate_os():
 
 def run_update():
     os_type = validate_os()
-    if os_type == "debian":
-        # Comando para forçar instalação sem pedir confirmação (Ideal para automação)
-        cmd = 'export DEBIAN_FRONTEND=noninteractive ; apt-get upgrade -y -o Dpkg::Options::="--force-confold"'
+    # Adicionamos "ubuntu" na verificação
+    if os_type in ["debian", "ubuntu"]:
+        # Usamos dist-upgrade para garantir que o Kernel seja atualizado
+        cmd = 'export DEBIAN_FRONTEND=noninteractive ; apt-get update && apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold"'
+        print("Iniciando atualização crítica...")
         os.system(cmd)
     elif os_type == "rhel":
         os.system("yum update -y")
