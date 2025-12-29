@@ -20,7 +20,7 @@
         force: no
 
     - name: Rodar Script de Coleta (Get Packages)
-      script: scripts/get_packages.py
+      script: get_packages.py
       register: check_info
 
     - name: Mostrar pacotes vulneráveis no console do AWX
@@ -28,7 +28,7 @@
         var: check_info.stdout_lines
 
     - name: Rodar Script de Atualização (Kernel e Seguranca)
-      script: scripts/cloud_autoupdate.py
+      script: cloud_autoupdate.py
       register: update_result
 
     - name: Identificar se o Kernel foi atualizado
