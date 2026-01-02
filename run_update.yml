@@ -33,7 +33,7 @@
 
     - name: Identificar se o Kernel foi atualizado
       set_fact:
-        needs_reboot: "{{ 'linux' in update_result.stdout | lower or 'kernel' in update_result.stdout | lower }}"
+        needs_reboot: "{{ 'linux-image' in update_result.stdout or 'kernel' in update_result.stdout or 'linux-generic' in update_result.stdout }}"
 
     - name: Reiniciar Servidor VMware (Somente se necessário)
       reboot:
