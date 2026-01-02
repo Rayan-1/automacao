@@ -14,15 +14,14 @@ def validate_os():
 
 def run_update():
     os_type = validate_os()
-    if os_type == "debian":
-        # Usamos subprocess.check_output para capturar o texto da atualização
+    # Adicionamos "ubuntu" na verificação
+    if os_type in ["debian", "ubuntu"]:
+        # Usamos dist-upgrade para garantir que o Kernel seja atualizado
         cmd = 'export DEBIAN_FRONTEND=noninteractive ; apt-get update && apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold"'
         print("Iniciando atualização crítica...")
-        # O output captura todo o log da instalação (incluindo a palavra 'linux-image')
-        output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT, universal_newlines=True)
-        print(output) # Isso envia o texto para o update_result.stdout do Ansible
+        os.system(cmd)
     elif os_type == "rhel":
-        output = subprocess.check_output("yum update -y", shell=True, universal_newlines=True)
-        print(output)
+        os.system("yum update -y")
+
 if __name__ == "__main__":
     run_update()
