@@ -23,10 +23,6 @@
       script: get_packages.py
       register: check_info
 
-    - name: Mostrar pacotes vulneráveis no console do AWX
-      debug:
-        var: check_info.stdout_lines
-
     - name: Rodar Script de Atualização (Kernel e Seguranca)
       script: cloud_autoupdate.py
       register: update_result
@@ -36,8 +32,13 @@
         path: /var/run/reboot-required
       register: reboot_status
 
+    # Adicionei este debug para você ver o erro no console do AWX
+    - name: Debug - Validar se o arquivo foi detectado
+      debug:
+        msg: "Status do arquivo de reboot: {{ reboot_status.stat.exists }}"
+
     - name: Reiniciar Servidor VMware (Apenas se o Kernel foi atualizado)
       reboot:
         reboot_timeout: 600
         msg: "Reiniciando via AWX para aplicar novo Kernel"
-      when: reboot_status.stat.exists
+      when: reboot_status.stat.exists == true
