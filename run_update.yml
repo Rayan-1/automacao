@@ -31,14 +31,13 @@
       script: cloud_autoupdate.py
       register: update_result
 
-    # NOVA LÓGICA: Verifica o arquivo do sistema em vez de ler texto de log
-    - name: Verificar se o sistema operacional sinalizou necessidade de reboot
+    - name: Verificar se o Kernel ou pacotes críticos exigem reboot
       stat:
         path: /var/run/reboot-required
-      register: reboot_required_file
+      register: reboot_status
 
-    - name: Reiniciar Servidor VMware (Somente se necessário)
+    - name: Reiniciar Servidor VMware (Apenas se o Kernel foi atualizado)
       reboot:
         reboot_timeout: 600
-        msg: "Reiniciando para aplicar novo Kernel via AWX"
-      when: reboot_required_file.stat.exists
+        msg: "Reiniciando via AWX para aplicar novo Kernel"
+      when: reboot_status.stat.exists
