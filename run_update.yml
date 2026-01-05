@@ -39,4 +39,4 @@
       reboot:
         reboot_timeout: 600
         msg: "Reiniciando para aplicar novo Kernel via AWX"
-      when: needs_reboot
+      when: needs_reboot | bool
