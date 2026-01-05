@@ -14,14 +14,14 @@ def validate_os():
 
 def run_update():
     os_type = validate_os()
-    # Adicionamos "ubuntu" na verificação
     if os_type in ["debian", "ubuntu"]:
-        # Usamos dist-upgrade para garantir que o Kernel seja atualizado
         cmd = 'export DEBIAN_FRONTEND=noninteractive ; apt-get update && apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold"'
-        print("Iniciando atualização crítica...")
-        os.system(cmd)
+        # MUDANÇA AQUI: subprocess captura o texto para o Ansible ler
+        resultado = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        print(resultado.stdout) # Isso joga o texto no .stdout que seu YAML procura
     elif os_type == "rhel":
-        os.system("yum update -y")
+        resultado = subprocess.run("yum update -y", shell=True, capture_output=True, text=True)
+        print(resultado.stdout)
 
 if __name__ == "__main__":
     run_update()
