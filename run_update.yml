@@ -40,5 +40,4 @@
       reboot:
         reboot_timeout: 600
         msg: "Reiniciando para aplicar novo Kernel via AWX"
-      # REMOVA o 'p.stat.exists' e use a variável abaixo:
       when: needs_reboot | bool

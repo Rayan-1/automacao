@@ -1,33 +1,42 @@
 #!/usr/bin/env python3
 import os
 import subprocess
-import configparser
-
-# Lógica de leitura de config
-cfg = configparser.ConfigParser()
-cfg_path = '/etc/cloud-autoupdate/cloud-autoupdate.conf'
-if os.path.exists(cfg_path):
-    cfg.read(cfg_path)
 
 def validate_os():
+    if not os.path.exists('/etc/os-release'): return "unknown"
     with open('/etc/os-release', "r") as file:
-        content = file.read()
-        if "rhel" in content: return "rhel"
+        content = file.read().lower()
+        if "rhel" in content or "centos" in content: return "rhel"
         if "debian" in content: return "debian"
-        if "ubuntu" in content or "Ubuntu" in content: return "ubuntu"
+        if "ubuntu" in content: return "ubuntu"
 
 def update_apt():
-    os.system("apt-get update 1>/dev/null")
-    # Aqui vai a lógica de listar pacotes do seu script original...
-    cmd = 'apt list --upgradable 2>/dev/null | cut -d "/" -f 1'
-    print(subprocess.getoutput(cmd))
+    # Removi o 1>/dev/null para você ver se o update deu erro
+    subprocess.run(["apt-get", "update"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    
+    # Pegamos a lista, mas sem filtros agressivos primeiro para garantir que vemos algo
+    cmd = 'apt list --upgradable 2>/dev/null'
+    saida = subprocess.getoutput(cmd)
+    
+    if "Listing..." in saida and len(saida.splitlines()) <= 1:
+        print("SISTEMA_OK: Nenhum pacote pendente no Debian/Ubuntu")
+    else:
+        print("PACOTES_PARA_ATUALIZAR:")
+        print(saida)
 
 def update_yum():
-    cmd = "yum list updates 2>/dev/null | awk '{print $1}'"
-    print(subprocess.getoutput(cmd))
+    cmd = "yum list updates -q 2>/dev/null"
+    saida = subprocess.getoutput(cmd)
+    
+    if not saida.strip():
+        print("SISTEMA_OK: Nenhum pacote pendente no RHEL")
+    else:
+        print("PACOTES_PARA_ATUALIZAR:")
+        print(saida)
 
 if __name__ == "__main__":
     os_type = validate_os()
+    print(f"--- Verificando atualizações em: {os_type.upper()} ---")
     if os_type in ["debian", "ubuntu"]:
         update_apt()
     elif os_type == "rhel":
