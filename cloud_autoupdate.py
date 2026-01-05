@@ -17,18 +17,22 @@ def run_update():
     if os_type in ["debian", "ubuntu"]:
         cmd = 'export DEBIAN_FRONTEND=noninteractive ; apt-get update && apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold"'
         print("Iniciando atualização crítica...")
-        # EM VEZ DE os.system(cmd), USE:
         try:
-            # Isso captura a saída e manda para o stdout que o seu YAML lê
             resultado = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT, text=True)
             print(resultado) 
         except subprocess.CalledProcessError as e:
             print(e.output)
 
+        # ADICIONE ISSO AQUI:
+        if os.path.exists('/var/run/reboot-required'):
+            print("SISTEMA_SINALIZA: kernel_update_detected")
+
     elif os_type == "rhel":
-        # Mesma lógica para RHEL
         resultado = subprocess.check_output("yum update -y", shell=True, text=True)
         print(resultado)
+        # Opcional para RHEL:
+        if "kernel" in resultado:
+             print("SISTEMA_SINALIZA: kernel_update_detected")
 
 if __name__ == "__main__":
     run_update()

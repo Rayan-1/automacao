@@ -33,7 +33,7 @@
 
     - name: Identificar se o Kernel foi atualizado
       set_fact:
-        needs_reboot: /var/run/reboot-required
+        path: /var/run/reboot-required
         register: p
 
     - name: Reiniciar Servidor VMware (Somente se necessário)
