@@ -18,19 +18,19 @@ def run_update():
         cmd = 'export DEBIAN_FRONTEND=noninteractive ; apt-get update && apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold"'
         print("Iniciando atualização crítica...")
         try:
+            # Captura o texto da atualização para o AWX ler
             resultado = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT, text=True)
             print(resultado) 
         except subprocess.CalledProcessError as e:
             print(e.output)
 
-        # ADICIONE ISSO AQUI:
+        # Se o arquivo existir (pelo touch ou pelo apt), o Python grita "kernel"
         if os.path.exists('/var/run/reboot-required'):
             print("SISTEMA_SINALIZA: kernel_update_detected")
 
     elif os_type == "rhel":
         resultado = subprocess.check_output("yum update -y", shell=True, text=True)
         print(resultado)
-        # Opcional para RHEL:
         if "kernel" in resultado:
              print("SISTEMA_SINALIZA: kernel_update_detected")
 
