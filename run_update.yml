@@ -29,15 +29,16 @@
 
     - name: Rodar Script de Atualização (Kernel e Seguranca)
       script: cloud_autoupdate.py
-      register: update_result
+      register: update_result  # Aqui o Ansible guarda tudo que o Python deu 'print'
 
     - name: Identificar se o Kernel foi atualizado
       set_fact:
-        path: /var/run/reboot-required
-        register: p
+        # Ele vai procurar a palavra 'kernel' ou 'linux-image' dentro do print do Python
+        needs_reboot: "{{ 'kernel' in update_result.stdout or 'linux-image' in update_result.stdout }}"
 
     - name: Reiniciar Servidor VMware (Somente se necessário)
       reboot:
         reboot_timeout: 600
         msg: "Reiniciando para aplicar novo Kernel via AWX"
-      when: p.stat.exists
+      # REMOVA o 'p.stat.exists' e use a variável abaixo:
+      when: needs_reboot | bool
