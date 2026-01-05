@@ -3,12 +3,25 @@ import os
 import subprocess
 
 def validate_os():
-    if not os.path.exists('/etc/os-release'): return "unknown"
+    if not os.path.exists('/etc/os-release'): 
+        return "unknown"
+        
     with open('/etc/os-release', "r") as file:
         content = file.read().lower()
-        if "rhel" in content or "centos" in content: return "rhel"
-        if "debian" in content: return "debian"
-        if "ubuntu" in content: return "ubuntu"
+        
+        # 1. Cheque o Ubuntu PRIMEIRO
+        if "ubuntu" in content: 
+            return "ubuntu"
+            
+        # 2. Depois cheque o Debian
+        if "debian" in content: 
+            return "debian"
+            
+        # 3. Por fim, a família RHEL
+        if "rhel" in content or "centos" in content: 
+            return "rhel"
+            
+    return "unknown"
 
 def update_apt():
     # Removi o 1>/dev/null para você ver se o update deu erro
